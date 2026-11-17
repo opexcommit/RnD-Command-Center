@@ -1,0 +1,2 @@
+# keep every file byte-for-byte: no line-ending rewriting of build output or seed data
+* -text
