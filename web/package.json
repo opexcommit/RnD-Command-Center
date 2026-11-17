@@ -1,0 +1,24 @@
+{
+  "name": "rnd-command-center-web",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@lucasmarkes/hairline": "^0.5.1",
+    "@react-three/fiber": "^9.8.2",
+    "@shadergradient/react": "^2.4.20",
+    "camera-controls": "2.9.0",
+    "motion": "^12.0.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "three": "^0.169.0",
+    "three-stdlib": "^2.30.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.3.0",
+    "vite": "^8"
+  }
+}

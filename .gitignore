@@ -1,0 +1,14 @@
+# databases never live in this OneDrive-synced folder, and never in git
+*.db
+*.db-wal
+*.db-shm
+
+# Node installs happen in %LOCALAPPDATA%\rnd-cc-build, not here
+node_modules/
+
+# hand-over zips are built from the tree
+*.zip
+
+__pycache__/
+*.pyc
+.claude/settings.local.json

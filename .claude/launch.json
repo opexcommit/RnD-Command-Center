@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "rnd-command-center",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-c", "import os,tempfile,runpy;os.environ.update(PORT='8765',HOST='127.0.0.1',RND_DB=os.path.join(tempfile.gettempdir(),'rnd-preview-v2.db'));runpy.run_path('server.py',run_name='__main__')"],
+      "port": 8765
+    }
+  ]
+}
