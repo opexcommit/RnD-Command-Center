@@ -30,7 +30,7 @@ The project folder is inside OneDrive:
 - Never leave an `rnd.db` here (SQLite WAL and file sync do not mix) and never put one in the zip.
 - Never run `npm install` here. `build.ps1` copies `web/` to `%LOCALAPPDATA%\rnd-cc-build`, builds there and copies `dist/` back, so `node_modules` stays out of OneDrive.
 
-The folder is a local git repository (no remote). Databases, `node_modules` and the hand-over zips are ignored; `dist/` is tracked. `nabati-rnd-command-center-v1.zip` is the last single-file, dependency-free version and predates the repository.
+The folder is a git repository pushed to `github.com/opexcommit/RnD-Command-Center`, which is PUBLIC. Databases, `node_modules`, the hand-over zips and `seed.csv` (real project names) are ignored and must never be committed; `dist/` is tracked. Commits use the GitHub no-reply identity set in the repo config. `nabati-rnd-command-center-v1.zip` is the last single-file, dependency-free version and predates the repository.
 
 ## Architecture
 
