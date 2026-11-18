@@ -56,33 +56,79 @@ function Ribbon({ children }) {
   return <div className="ribbon" ref={ref}><div className="ribbon-strip">{children}</div></div>;
 }
 
-function Track({ kind, title, stages, projects, openDialog }) {
+function Track({ kind, title, stages, statuses, projects, openDialog }) {
   const list = projects.filter(p => stageSet(p.type) === kind);
   const groups = stages.map(st => list.filter(p => p.stage === st));
-  const [picked, setPicked] = useState(null);
+  const [picked, setPicked] = useState(null);   // folder under the pointer or focus: shows the drifting chips
+  const [pinned, setPinned] = useState(null);   // folder clicked open: shows the full list with filters
+  const [q, setQ] = useState('');
+  const [fs, setFs] = useState('');
+  const [fc, setFc] = useState('');
   const [has3d, setHas3d] = useState(false);
-  // open the first step that has projects until the user points at another
-  const active = picked != null && picked < stages.length ? picked : Math.max(0, groups.findIndex(g => g.length));
+  const ok = v => v != null && v < stages.length;
+  const isPinned = ok(pinned);
+  // a pinned folder wins; otherwise the one pointed at; otherwise the first step that has projects
+  const active = isPinned ? pinned : ok(picked) ? picked : Math.max(0, groups.findIndex(g => g.length));
+  const st = stages[active];
   const items = groups[active] || [];
+  const needle = q.trim().toLowerCase();
+  const rows = items.filter(p => (!fs || p.status === fs) && (!fc || p.category === fc) &&
+    (!needle || (p.code + ' ' + p.name).toLowerCase().includes(needle)));
+  const cats = [...new Set(items.map(p => p.category).filter(Boolean))].sort();
+  const pin = i => { setPinned(pinned === i ? null : i); setPicked(i); setQ(''); setFs(''); setFc(''); };
+  const point = i => { if (!isPinned) setPicked(i); };
   return (
     <div className="track">
       <h3>{title} <span className="sub">{plural(list.length, 'project', 'projects')}</span></h3>
-      <div className={'folder-row' + (has3d ? ' has3d' : '')} style={{ '--n': stages.length }}>
-        <div className="folder-scene" aria-hidden="true">
-          <Boundary><Suspense fallback={null}><Folders3D n={stages.length} active={active} onReady={() => setHas3d(true)} /></Suspense></Boundary>
+      <div className="folder-scroll">
+        <div className={'folder-row' + (has3d ? ' has3d' : '')} style={{ '--n': stages.length }}>
+          <div className="folder-scene" aria-hidden="true">
+            <Boundary><Suspense fallback={null}>
+              <Folders3D counts={groups.map(g => g.length)} active={active} pinned={isPinned ? pinned : null} onReady={() => setHas3d(true)} />
+            </Suspense></Boundary>
+          </div>
+          {stages.map((name, i) => (
+            <button key={name} type="button" className={'fbtn' + (i === active ? ' on' : '')} style={{ '--i': i }} aria-expanded={pinned === i}
+              aria-label={`${name}, ${plural(groups[i].length, 'project', 'projects')}`}
+              onPointerEnter={() => point(i)} onFocus={() => point(i)} onClick={() => pin(i)}>
+              <span className="gate-name">{name}</span><span className="gate-n">{groups[i].length}</span>
+            </button>
+          ))}
         </div>
-        {stages.map((st, i) => (
-          <button key={st} type="button" className="fbtn" style={{ '--i': i }} aria-pressed={i === active}
-            aria-label={`${st}, ${plural(groups[i].length, 'project', 'projects')}`}
-            onPointerEnter={() => setPicked(i)} onFocus={() => setPicked(i)} onClick={() => setPicked(i)}>
-            <span className="gate-name">{st}</span><span className="gate-n">{groups[i].length}</span>
-          </button>
-        ))}
       </div>
       <AnimatePresence mode="wait" initial={false}>
-        <motion.div key={stages[active]} className="folder-body" role="group" aria-label={`${stages[active]} projects`}
+        <motion.div key={st + (isPinned ? ' list' : '')} className="folder-body" role="group" aria-label={`${st} projects`}
+          onKeyDown={e => { if (e.key === 'Escape' && isPinned) setPinned(null); }}
           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.16 }}>
-          {items.length ? (
+          {isPinned ? (
+            <>
+              <div className="bar-top list-bar">
+                <b>{st}</b>
+                <span className="hint">{rows.length === items.length ? plural(items.length, 'project', 'projects') : `${rows.length} of ${items.length} projects`}</span>
+                <input className="field" type="search" placeholder="Search code or name" aria-label={`Search ${st} projects`} value={q} onChange={e => setQ(e.target.value)} />
+                <select className="field" aria-label="Filter by status" value={fs} onChange={e => setFs(e.target.value)}>
+                  <option value="">All statuses</option>{statuses.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+                <select className="field" aria-label="Filter by category" value={fc} onChange={e => setFc(e.target.value)}>
+                  <option value="">All categories</option>{cats.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+                <button type="button" className="x" aria-label="Close list" onClick={() => setPinned(null)}>&times;</button>
+              </div>
+              {rows.length ? (
+                <ul className="rowlist folder-list">
+                  {rows.map(p => (
+                    <li key={p.id}>
+                      <button className="link" type="button" style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }} onClick={() => openDialog(p)}>
+                        <StatusIcon status={p.status} />
+                        <span className="grow"><span className="t1">{p.name}</span><span className="t2">{`${p.code}, ${p.category || 'No category'}`}</span></span>
+                        <span className="right">{p.status}<br />{'Changed ' + ago(p.updated_at)}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className="hint">{items.length ? 'No project matches these filters.' : 'No projects at this step'}</p>}
+            </>
+          ) : items.length ? (
             <Ribbon>
               {items.map(p => (
                 <motion.button key={p.id} className="chip" type="button" whileHover={{ y: -2 }}
@@ -140,7 +186,7 @@ export default function Dashboard({ data, openDialog, animated }) {
   const rows = Object.entries(sites).sort((a, b) => b[1].t - a[1].t);
   const max = Math.max(1, ...rows.map(([, s]) => Math.max(s.t, s.r)));
   const next = open.filter(p => p.target_date).sort((a, b) => a.target_date.localeCompare(b.target_date)).slice(0, 6);
-  const trackProps = { projects: P, openDialog };
+  const trackProps = { projects: P, statuses, openDialog };
 
   return (
     <>
@@ -148,7 +194,7 @@ export default function Dashboard({ data, openDialog, animated }) {
         <div className="flow-head">
           <div>
             <h2>Where every project stands</h2>
-            <p>Each folder is a step. Point at a folder to open it and watch its projects drift past; select a project to edit.</p>
+            <p>Each folder is a step. Point at a folder to watch its projects drift past, or click it to open the full list with search and filters. Select a project to edit.</p>
           </div>
           <Figure kind="slow" label="Crates passing through a gate" className="figure-flow" />
         </div>

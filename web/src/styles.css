@@ -51,7 +51,7 @@ main{max-width:1320px;margin:0 auto;padding:20px}
 .hint{color:var(--ink2);font-size:13px}
 
 /* dashboard: stage-gate track */
-.flow{padding:20px 22px 14px;margin-bottom:16px;overflow-x:auto}
+.flow{padding:20px 22px 14px;margin-bottom:16px}
 .flow-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
 .flow h2{font-size:20px;font-weight:650;letter-spacing:-.01em}
 .flow-head p{color:var(--ink2);margin:2px 0 6px}
@@ -61,11 +61,18 @@ main{max-width:1320px;margin:0 auto;padding:20px}
 .folder-row{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));position:relative;min-width:600px}
 .folder-scene{position:absolute;inset:0 0 auto 0;height:112px;pointer-events:none}
 .fbtn{position:relative;padding:112px 4px 8px;border:0;background:none;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;line-height:1.25}
-.fbtn[aria-pressed="true"] .gate-name{color:var(--ink);font-weight:600}
+.fbtn.on .gate-name{color:var(--ink);font-weight:600}
 .fbtn::before{content:"";position:absolute;left:50%;top:40px;width:64px;height:44px;margin-left:-32px;background:var(--tile);border:1px solid var(--hairline-mid);border-radius:0 8px 8px 8px}
 .fbtn::after{content:"";position:absolute;left:50%;top:31px;width:26px;height:10px;margin-left:-32px;background:var(--tile);border:1px solid var(--hairline-mid);border-bottom:0;border-radius:5px 8px 0 0}
-.fbtn[aria-pressed="true"]::before,.fbtn[aria-pressed="true"]::after{border-color:var(--hairline-edge);background:var(--accent-soft)}
+.fbtn.on::before,.fbtn.on::after{border-color:var(--hairline-edge);background:var(--accent-soft)}
 .has3d .fbtn::before,.has3d .fbtn::after{display:none}
+.folder-scroll{overflow-x:auto} /* on a narrow screen only the folder row scrolls sideways, not the whole panel */
+.fbtn:focus-visible{outline-offset:-2px}
+.fbtn[aria-expanded="true"]{background:var(--accent-soft)}
+.list-bar{margin-bottom:8px;gap:8px}
+.list-bar .field{flex:1 1 130px;max-width:240px}
+.list-bar .x{margin-left:auto}
+.folder-list{max-height:320px;overflow-y:auto;padding-right:4px}
 .folder-body{background:var(--tile);border:1px solid var(--hairline-mid);border-radius:12px;padding:8px;margin-top:4px;box-shadow:3px 3px 0 -1px var(--tile),3px 3px 0 0 var(--hairline-lo)} /* the shadow pair draws a second sheet behind */
 .ribbon{overflow-x:auto;scrollbar-width:thin;scrollbar-color:transparent transparent;padding:3px 0} /* the bar shows only while the strip is held and really scrollable */
 .ribbon:hover,.ribbon:focus-within{scrollbar-color:var(--hairline-lo) transparent}
